@@ -24,6 +24,8 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
     private static final Interpolator INTERPOLATOR = new FastOutSlowInInterpolator();
 
     private int mDySinceDirectionChange;
+    private boolean mIsShowing;
+    private boolean mIsHiding;
 
     public QuickReturnFooterBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -45,9 +47,13 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
 
         mDySinceDirectionChange += dy;
 
-        if (mDySinceDirectionChange > child.getHeight() && child.getVisibility() == View.VISIBLE) {
+        if (mDySinceDirectionChange > child.getHeight()
+                && child.getVisibility() == View.VISIBLE
+                && !mIsHiding) {
             hide(child);
-        } else if (mDySinceDirectionChange < 0 && child.getVisibility() == View.GONE) {
+        } else if (mDySinceDirectionChange < 0
+                && child.getVisibility() == View.GONE
+                && !mIsShowing) {
             show(child);
         }
     }
@@ -61,6 +67,7 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
      * @param view The quick return view
      */
     private void hide(final View view) {
+        mIsHiding = true;
         ViewPropertyAnimator animator = view.animate()
                 .translationY(view.getHeight())
                 .setInterpolator(INTERPOLATOR)
@@ -73,13 +80,17 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
             @Override
             public void onAnimationEnd(Animator animator) {
                 // Prevent drawing the View after it is gone
+                mIsHiding = false;
                 view.setVisibility(View.GONE);
             }
 
             @Override
             public void onAnimationCancel(Animator animator) {
                 // Canceling a hide should show the view
-                show(view);
+                mIsHiding = false;
+                if (!mIsShowing) {
+                    show(view);
+                }
             }
 
             @Override
@@ -98,6 +109,7 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
      * @param view The quick return view
      */
     private void show(final View view) {
+        mIsShowing = true;
         ViewPropertyAnimator animator = view.animate()
                 .translationY(0)
                 .setInterpolator(INTERPOLATOR)
@@ -110,12 +122,17 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
             }
 
             @Override
-            public void onAnimationEnd(Animator animator) {}
+            public void onAnimationEnd(Animator animator) {
+                mIsShowing = false;
+            }
 
             @Override
             public void onAnimationCancel(Animator animator) {
                 // Canceling a show should hide the view
-                hide(view);
+                mIsShowing = false;
+                if (!mIsHiding) {
+                    hide(view);
+                }
             }
 
             @Override
