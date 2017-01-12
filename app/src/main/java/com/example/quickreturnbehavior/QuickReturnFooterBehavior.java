@@ -52,7 +52,7 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
                 && !mIsHiding) {
             hide(child);
         } else if (mDySinceDirectionChange < 0
-                && child.getVisibility() == View.GONE
+                && child.getVisibility() == View.INVISIBLE
                 && !mIsShowing) {
             show(child);
         }
@@ -81,7 +81,7 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
             public void onAnimationEnd(Animator animator) {
                 // Prevent drawing the View after it is gone
                 mIsHiding = false;
-                view.setVisibility(View.GONE);
+                view.setVisibility(View.INVISIBLE);
             }
 
             @Override
